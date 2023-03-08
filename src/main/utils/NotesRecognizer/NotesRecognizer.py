@@ -4,6 +4,7 @@ import librosa
 # from librosa.core import hz_to_noteName
 from pathlib import Path
 from glob import glob
+import pyaudio
 
 # import music21
 # from pydub import AudioSegment
@@ -145,7 +146,7 @@ notes = {'A0': 27.5,
 def reconocedorDeNotasAure():
     # Audio de entrada
     pista = glob("src/main/utils/NotesRecognizer/LA4.wav")
-    pistaPersonalidad = glob("src/main/utils/NotesRecognizer/vocals.wav")
+    pistaPersonalidad = glob("src/main/utils/NotesRecognizer/recorte.wav")
     
     # Load
     y, sr = librosa.load(pistaPersonalidad[0])
@@ -154,14 +155,15 @@ def reconocedorDeNotasAure():
     f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
     # convertir la frecuencia en una nota musical
-    note_number = int(round(12*np.log2(f0/440) + 69))
-    note_name = librosa.midi_to_note_name(note_number)
+    # note_number = int(round(12*np.log2(f0/440) + 69))
+    # note_name = librosa.midi_to_note_name(note_number)
     escribirFichero(f0)
 
 def escribirFichero(f0):
     f = open("src/main/utils/NotesRecognizer/fichero.txt", 'w')
     for line in f0:
         f.write(str(line) + "\n")
+
 
 def leerFichero():
     f = open("src/main/utils/NotesRecognizer/fichero.txt", 'r')
@@ -172,7 +174,9 @@ def leerFichero():
         if line.find("nan") == -1:
             data = float(line)
             notesVector.append(getNearestFrequency(data))
-        
+            nota= notes[getNearestFrequency(data)]
+            play_note(nota, 0.0205479452054795)
+
     print(notesVector[20:40])
     
 
@@ -273,5 +277,32 @@ def recognizeNotes():
 
 # def extractVoice(file):
 #     return 0
+
+def play_note(freq, duration):
+    p = pyaudio.PyAudio()
+
+    # Definir los parámetros del sonido
+    volume = 0.5
+    sampling_rate = 44100
+
+    # Crear un array con los valores del sonido
+    t = np.linspace(0, duration, int(duration * sampling_rate), False)
+    note = volume * np.sin(freq * 2 * np.pi * t)
+
+    # Crear un stream para reproducir el sonido
+    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=sampling_rate, output=True)
+
+    # Reproducir el sonido
+    stream.write(note.astype(np.float32).tobytes())
+
+    # Detener y cerrar el stream
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+# Ejemplo de uso
+# play_note(440, 1) # Generar la nota La 440 durante 1 segundo
+
+# leerFichero()
+reconocedorDeNotasAure()
 leerFichero()
-#reconocedorDeNotasAure()

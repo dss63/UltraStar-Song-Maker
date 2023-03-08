@@ -10,16 +10,17 @@ from utils.NotesRecognizer import NotesRecognizer
 from pathlib import Path
 
 if __name__ == '__main__':
-    filename = Path("/home/aureortiz/Projects/USSM/src/resources/songs/personalidad")
+    # filename = Path("/home/aureortiz/Projects/USSM/src/resources/songs/personalidad")
 
     # STEP 1: LOAD FILES (SONG, LYRICS, VIDEO)
     # lyrics = LyricsReader().readFile(Path.joinpath(filename, "lyrics.txt"))
     
     # STEP 2: EXTRACT MUSICAL NOTES FROM SONG
-    # notes = NotesRecognizer.recognizeNotes(Path.joinpath(filename, "song.mp3"))
-    
+    notes = NotesRecognizer.reconocedorDeNotasAure()
+    notes = NotesRecognizer.leerFichero()
+
     # STEP 3: ARRANGE FILE TO BE INCLUDED IN ULTRASTAR
     # cancion = Song(filename)
 
     # Llamamos al .txt
-    FileReader.submit_form()
+    # FileReader.submit_form()
