@@ -145,11 +145,11 @@ notes = {'A0': 27.5,
 # que ayuden a reconocer notas de audios
 def reconocedorDeNotasAure():
     # Audio de entrada
-    pista = glob("src/main/utils/NotesRecognizer/LA4.wav")
+    pista = glob("src/main/utils/NotesRecognizer/prueba2.mp3")
     pistaPersonalidad = glob("src/main/utils/NotesRecognizer/recorte.wav")
     
     # Load
-    y, sr = librosa.load(pistaPersonalidad[0])
+    y, sr = librosa.load(pista[0])
     
     # Extraer la frecuencia fundamental
     f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
@@ -175,9 +175,10 @@ def leerFichero():
             data = float(line)
             notesVector.append(getNearestFrequency(data))
             nota= notes[getNearestFrequency(data)]
-            play_note(nota, 0.0205479452054795)
+            print(getNearestFrequency(data))
+            # play_note(nota, 0.01)
 
-    print(notesVector[20:40])
+    print(notesVector[0:40])
     
 
 def getNearestFrequency(f):
