@@ -7,6 +7,8 @@ from glob import glob
 import pyaudio
 import matplotlib.pyplot as plt
 import sys
+import scipy.signal as sig
+from scipy.io import wavfile
 
 # import music21
 # from pydub import AudioSegment
@@ -147,13 +149,27 @@ notes = {'A0': 27.5,
 # que ayuden a reconocer notas de audios
 def reconocedorDeNotasAure():
     # Audio de entrada
-    pista = glob("src/main/utils/NotesRecognizer/prueba3.mp3")
+    pista = glob("src/main/utils/NotesRecognizer/pruebaKiss.mp3")
     pistaPersonalidad = glob("src/main/utils/NotesRecognizer/recorte.wav")
     
     # Load
     y, sr = librosa.load(pista[0])
 
-    # Extraer la frecuencia fundamental
+    # Diseñar filtro pasa bajos Butterworth
+    # fc = 500  # Frecuencia de corte del filtro en Hz
+    # b, a = sig.butter(4, fc/(sr/2), 'lowpass')
+
+    # # Aplicar filtro a la señal de audio
+    # y_filtered = sig.filtfilt(b, a, y)
+
+    # # Guardar el archivo de audio filtrado
+    # wavfile.write('audio_filtered.wav', sr, y_filtered)
+
+    #Extraer la frecuencia fundamental filtrada
+    #f0, voiced_flag, voiced_probs = librosa.pyin(y_filtered, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
+
+
+    #Extraer la frecuencia fundamental
     f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
     # convertir la frecuencia en una nota musical
@@ -164,8 +180,11 @@ def reconocedorDeNotasAure():
 def escribirFichero(f0):
     f = open("src/main/utils/NotesRecognizer/fichero.txt", 'w')
     for line in f0:
+        # if not np.isnan(line):
         f.write(str(line) + "\n")
-
+        # else:
+        #     f.write(str("silencio") + "\n")
+   
 
 def leerFichero():
     f = open("src/main/utils/NotesRecognizer/fichero.txt", 'r')
@@ -178,16 +197,14 @@ def leerFichero():
         if line.find("nan") == -1:
             data = float(line)
             notesVector.append(getNearestFrequency(data))
-            freqVector.append(notes[getNearestFrequency(data)])
             nota= notes[getNearestFrequency(data)]
-            # print(getNearestFrequency(data))
            
     # print(notesVector)
-    
-    print(sys.getsizeof(freqVector))
-    print(sys.getsizeof(notesVector))
 
-    plt.plot(sorted(freqVector),sorted(notesVector))
+    for i, element in enumerate(notesVector):
+        freqVector.append(i)
+
+    plt.plot(freqVector,notesVector,linestyle='-', linewidth=1)
     plt.show()
 
 def getNearestFrequency(f):
