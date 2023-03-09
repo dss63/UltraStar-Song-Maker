@@ -5,6 +5,8 @@ import librosa
 from pathlib import Path
 from glob import glob
 import pyaudio
+import matplotlib.pyplot as plt
+import sys
 
 # import music21
 # from pydub import AudioSegment
@@ -145,12 +147,12 @@ notes = {'A0': 27.5,
 # que ayuden a reconocer notas de audios
 def reconocedorDeNotasAure():
     # Audio de entrada
-    pista = glob("src/main/utils/NotesRecognizer/prueba2.mp3")
+    pista = glob("src/main/utils/NotesRecognizer/prueba3.mp3")
     pistaPersonalidad = glob("src/main/utils/NotesRecognizer/recorte.wav")
     
     # Load
     y, sr = librosa.load(pista[0])
-    
+
     # Extraer la frecuencia fundamental
     f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
@@ -170,16 +172,23 @@ def leerFichero():
     lines = f.readlines()
 
     notesVector = []
+    freqVector = []
+
     for line in lines:
         if line.find("nan") == -1:
             data = float(line)
             notesVector.append(getNearestFrequency(data))
+            freqVector.append(notes[getNearestFrequency(data)])
             nota= notes[getNearestFrequency(data)]
-            print(getNearestFrequency(data))
-            # play_note(nota, 0.01)
-
-    print(notesVector[0:40])
+            # print(getNearestFrequency(data))
+           
+    # print(notesVector)
     
+    print(sys.getsizeof(freqVector))
+    print(sys.getsizeof(notesVector))
+
+    plt.plot(sorted(freqVector),sorted(notesVector))
+    plt.show()
 
 def getNearestFrequency(f):
     left = 4200
@@ -215,69 +224,6 @@ def recognizeNotes():
     print(y)
     print(sr)
 
-    # Prueba que esta bien cargada la canción
-    # with open("notas.txt", "w") as f:
-    #     for i in range(len(y)):
-    #         f.write(str(y[i])+"\n")
-
-    # # Extraer las frecuencias y la magnitud de la señal de audio
-    # freqs, magnitudes = librosa.core.magphase(librosa.stft(y))
-
-    # # Convertir las magnitudes a dB
-    # magnitudes_db = librosa.amplitude_to_db(magnitudes)
-
-    # # Encontrar las frecuencias dominantes en cada marco de tiempo
-    # frequencies = librosa.core.fft_frequencies(sr=sr, n_fft=2048)
-    # times = librosa.core.frames_to_time(np.arange(magnitudes_db.shape[1]), sr=sr, hop_length=512)
-    # freqs_idx = np.argmax(magnitudes_db, axis=0)
-    # dominant_freqs = frequencies[freqs_idx]
-
-    # # Asignar las frecuencias a notas musicales
-    # note_names = librosa.hz_to_note(dominant_freqs)
-
-    # # Escribir las notas en un archivo de texto
-    # with open('notas.txt', 'w') as f:
-    #     for i in range(len(note_names)):
-    #         f.write("{:.2f} {}\n".format(times[i], note_names[i]))
-
-
-    # # Leer archivo mp3
-    # song = AudioSegment.from_mp3(filepath)
-
-    # # Extraer notas musicales
-    # samples = song.get_array_of_samples()
-
-    # # Convertir a objeto numpy
-    # notes = np.array(samples)
-
-
-    # # Escribir notas en archivo txt
-    # with open("notas.txt", "w") as f:
-    #     f.write(str(notes))
-
-    # y, sr = librosa.load(filepath)
-    # print(len(y))
-    # print("sr",sr)
-    # pitches, magnitudes = librosa.piptrack(y, sr=sr)
-    # notes = []
-    # for i in range(pitches.shape[0]):
-    #     curr_pitch = pitches[i]
-    #     curr_magnitude = magnitudes[i].max()
-    #     note = librosa.hz_to_note(curr_pitch, octave=False, cents=True)
-    #     if curr_magnitude > 0.5:
-    #         notes.append(note)
-    # return notes
-
-    # Convertir audio a notas musicales
-#     stream = music21.converter.subConverters.ConverterMEI(filepath)
-#     notes = stream.flat.notes
-#     output_file = 'notas.txt'
-#     with open(output_file, 'w') as f:
-#         for note in notes:
-#             f.write(str(note.pitch) + ' ' + str(note.offsetSeconds) + '\n')
-
-# def extractVoice(file):
-#     return 0
 
 def play_note(freq, duration):
     p = pyaudio.PyAudio()
