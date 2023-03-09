@@ -149,8 +149,8 @@ notes = {'A0': 27.5,
 # que ayuden a reconocer notas de audios
 def reconocedorDeNotasAure():
     # Audio de entrada
-    pista = glob("src/main/utils/NotesRecognizer/pruebaKiss.mp3")
-    pistaPersonalidad = glob("src/main/utils/NotesRecognizer/recorte.wav")
+    pista = glob("src/main/utils/NotesRecognizer/aure.mp3")
+    pistaPersonalidad = glob("src/main/utils/NotesRecognizer/vocals.wav")
     
     # Load
     y, sr = librosa.load(pista[0])
@@ -192,19 +192,47 @@ def leerFichero():
 
     notesVector = []
     freqVector = []
+    posiciones = []
 
     for line in lines:
         if line.find("nan") == -1:
             data = float(line)
             notesVector.append(getNearestFrequency(data))
+            freqVector.append(notes[getNearestFrequency(data)])
             nota= notes[getNearestFrequency(data)]
-           
+
     # print(notesVector)
 
-    for i, element in enumerate(notesVector):
-        freqVector.append(i)
+    for i, element in enumerate(freqVector):
+        posiciones.append(i)
 
-    plt.plot(freqVector,notesVector,linestyle='-', linewidth=1)
+    plt.plot(posiciones,freqVector,linestyle='-', linewidth=1)
+
+    # Configurar título y etiquetas de los ejes
+    plt.suptitle('Análisis frecuencial')
+    plt.xlabel('Tiempo')
+    plt.ylabel('Frecuencias')
+
+    # Configurar tamaño de fuente
+    plt.tick_params(labelsize=10)
+
+
+    etiquetas=[]
+    for eti in notes.keys():
+        etiquetas.append(eti)
+
+    nuevo = []
+
+    # for etiqueta in etiquetas:
+    #     nuevo.append('{} ({})'.format(0, 1))
+
+    # plt.xticks(posiciones, nuevo)
+
+
+    # Configurar otros elementos de la gráfica
+    plt.grid(True)
+    plt.legend(['Audio'], loc='upper left')
+
     plt.show()
 
 def getNearestFrequency(f):
