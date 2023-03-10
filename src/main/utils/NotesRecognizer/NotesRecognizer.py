@@ -24,7 +24,7 @@ from scipy.io import wavfile
 class NotesUtils: 
 
     # Diccionario que contiene la frecuencia de cada nota CON escala
-    notes = {'nan':0,
+    notes = {'nan': 0,
             'A0': 27.5, 
             'A#0': 29.14, 
             'Bb0': 29.14, 
@@ -151,7 +151,8 @@ class NotesUtils:
             'C8': 4186.01 }
 
     # Diccionario que contiene la frecuencia de cada nota SIN escala
-    notes2 ={
+    # C = 1
+    notes2 ={ 
         'nan':[0],
         1:[32.7,65.41,130.81,261.63,523.25,1046.5,2093.0,4186.01],
         2:[34.65,69.3,138.59,277.18,554.37,1108.73,2217.46],
@@ -167,10 +168,15 @@ class NotesUtils:
         12:[30.87,61.74,123.47,246.94,493.88,987.77,1975.53,3951.07]
     }
 
+    # Sample rate para la detección de notas
+    sr = 44000
+
+    duracion = 0
+
     def __init__(self) -> None:
         pass
 
-    #NOTAS CON ESCALAS
+    # NOTAS CON ESCALAS
     def getNote(self, freq):
         for key, value in self.notes.items():
             if freq == value:
@@ -179,7 +185,7 @@ class NotesUtils:
     def getFreq(self, note):
         return self.notes.get(note)
 
-   #NOTAS SIN ESCALA
+   # NOTAS SIN ESCALA
     def getNote2(self, freq):
         for key, value in self.notes2.items():
             for i in value:
@@ -220,12 +226,13 @@ class NotesUtils:
         pista = glob(path)
     
         # Load
-        y, sr = librosa.load(pista[0])
+        y, sampleRate = librosa.load(pista[0], self.sr)
 
         f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
+        self.duracion = librosa.get_duration(y, self.sr)
+
         self.escribirFichero(f0)
-        print(f0[130])
 
     # Función que se encarga de escribir el "fichero.txt"
     def escribirFichero(self, f0):
@@ -282,9 +289,13 @@ class NotesUtils:
         p.terminate()
 
     # Función que se encarga de plotear la frecuencia
-    def plotFrequency(self, freq, plot):
-
-        fig, ax = plt.subplots()
+    def plotFrequency(self, freq, plot, ax):
+        
+        noFig = False
+        if ax == None:
+            fig, ax = plt.subplots()
+            noFig = True
+    
 
         vx = np.linspace(0, len(freq), len(freq))
         ax.plot(vx, freq, linestyle='-', linewidth=1)
@@ -294,7 +305,6 @@ class NotesUtils:
         plt.xlabel('Tiempo')
         plt.ylabel('Frecuencias')
         plt.grid(True)
-        plt.legend(['Audio'], loc='upper left')
 
         # Configurar tamaño de fuente
         plt.tick_params(labelsize=10)
@@ -317,48 +327,99 @@ class NotesUtils:
                     yLabels.append(key)
                     yHz.append(value)
 
-        ax.set_yticklabels(yLabels)
-        ax.set_yticks(yHz)
+        if noFig == True:
+            ax.set_yticklabels(yLabels)
+            ax.set_yticks(yHz)
 
         if plot:
             plt.show()
 
-        return fig
+        return ax
 
     # Función procesa la señal
-    def procesamientoDeFrecuencia(self, freqVector, muestreo): # Envolvente
+    def procesamientoDeFrecuencia(self, freqVector, muestreo, envolvente): # Envolvente
         # Envolvente. Para cada valor del vector, se cogen samplingRate/5 
         # elementos por la izquierda y por la derecha y se hace la media
-        tam = int(muestreo/5)
-        suavizado = []
-        for i in range(len(freqVector)):
-            if i < tam/2 + 1 or i > len(freqVector)- tam/2 - 1:
-                if i < tam/2 + 1:
-                    avg = sum(freqVector[i : int(i+tam/2)])/tam
+        
+        if envolvente:
+            tam = int(muestreo/5)
+            suavizado = []
+            for i in range(len(freqVector)):
+                if i < tam/2 + 1 or i > len(freqVector)- tam/2 - 1:
+                    if i < tam/2 + 1:
+                        avg = sum(freqVector[i : int(i+tam/2)])/tam
+                    else:
+                        avg = sum(freqVector[int(i-tam/2) : i])/tam
                 else:
-                    avg = sum(freqVector[int(i-tam/2) : i])/tam
+                    avg = sum(freqVector[int(i-tam/2) : int(i+tam/2)])/tam
+                suavizado.append(avg)
+
+            # Busco para cada valor de la freq suavizada su freq más cercana
+            for i in range(len(suavizado)):
+                note, freq = self.getNearestFrequencyNote(suavizado[i])
+                suavizado[i] = freq
+
+        return self.eliminarMinRate(10, freqVector)
+
+    def eliminarMinRate(self, rate, suavizado):
+        # Elimino las frecuencias que duren menos de 5 iteraciones
+        minCantidad = rate
+        ultimaNota = suavizado[0]
+        cantidad = 1
+        for i in range(1, len(suavizado)-1):
+            if suavizado[i] == suavizado[i+1]:
+                cantidad += 1
             else:
-                avg = sum(freqVector[int(i-tam/2) : int(i+tam/2)])/tam
-            suavizado.append(avg)
-
-
-        for i in range(len(suavizado)):
-            note, freq = self.getNearestFrequencyNote(suavizado[i])
-            suavizado[i] = freq
-
+                if cantidad < minCantidad:
+                    suavizado = self.restablecerValoresAnteriores(suavizado, i, ultimaNota)
+                else:
+                    ultimaNota = suavizado[i - cantidad]
+                cantidad = 0
+        
         return suavizado
 
-    def notasFichero(self, freqProcesada):
-        nFichero = []
+    def restablecerValoresAnteriores(self, suavizado, index, ultimaNota):
+        while(suavizado[index] != ultimaNota):
+            suavizado[index] = ultimaNota
+            index -= 1
+        return suavizado
 
-        for num in freqProcesada:
-            key=self.getNote2(num)
-            if key!="nan":
-                nFichero.append(key)
-            
+    def notasFichero(self, freq):
+        
+        notesVector = []
+        for i in freq:
+            notesVector.append(self.getNote2(i))
+        print(notesVector)
+
+
+
+
         f = open("src/main/utils/NotesRecognizer/notas.txt", 'w')
-        for line in nFichero:
-            f.write(":"+ " tiempo " + " Duracion " + str(line) + "\n")
+
+        v = []
+        instante = float(self.duracion / float(len(freq)))
+        print(instante, self.duracion)
+        tiempo = 0
+        tiempoAnterior = 0
+        keyAnterior = ""    
+
+        index = 0
+        for num in freq:
+            key = self.getNote2(num)
+            if key != keyAnterior :
+                if key != "nan":
+                    v.append([tiempo, 0, key]) # v = [tiempo, duracion, nota]
+                    if (index > 0):
+                        v[index - 1][1] = tiempo - tiempoAnterior
+                    index += 1
+                tiempoAnterior = tiempo
+            tiempo += instante
+            keyAnterior = key
+            
+        for vec in v:
+            vec[0] = int(vec[0] * 10)
+            vec[1] = int(vec[1] * 10)
+            f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
 
 
 
@@ -368,19 +429,19 @@ if __name__ == '__main__':
     NT = NotesUtils()
 
     # Reconocer notas y guardarlas en fichero
-    NT.reconocerNotas("src/main/utils/NotesRecognizer/aure.mp3")
+    NT.reconocerNotas("src/main/utils/NotesRecognizer/recorte.wav")
 
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 
     # Ploteo la grafica sin filtro
-    # figure = NT.plotFrequency(freqList, False)
+    ax = NT.plotFrequency(freqList, False, None)
 
     # Filtro
-    freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70)
+    freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70, False)
 
     # Ploteo la grafica con filtro
-    figure = NT.plotFrequency(freqProcesada, False)
+    # figure = NT.plotFrequency(freqProcesada, True, ax)
 
     # Creacion del vector notas sin escala para el fichero
     NT.notasFichero(freqProcesada)
