@@ -23,8 +23,9 @@ from scipy.io import wavfile
 
 class NotesUtils: 
 
-    # Diccionario que contiene la frecuencia de cada nota
-    notes = {'A0': 27.5, 
+    # Diccionario que contiene la frecuencia de cada nota CON escala
+    notes = {'nan':0,
+            'A0': 27.5, 
             'A#0': 29.14, 
             'Bb0': 29.14, 
             'B0': 30.87, 
@@ -149,9 +150,27 @@ class NotesUtils:
             'B7': 3951.07, 
             'C8': 4186.01 }
 
+    # Diccionario que contiene la frecuencia de cada nota SIN escala
+    notes2 ={
+        'nan':[0],
+        1:[32.7,65.41,130.81,261.63,523.25,1046.5,2093.0,4186.01],
+        2:[34.65,69.3,138.59,277.18,554.37,1108.73,2217.46],
+        3:[36.71,73.42,146.83,293.66,587.33,1174.66,2349.32],
+        4:[38.89,77.78,155.56,311.13,622.25,1244.51,2489.02],
+        5:[41.2,82.41,164.81,329.63,659.26,1318.51,2637.02],
+        6:[43.65,87.31,174.61,349.23,698.46,1396.91,2793.83],
+        7:[46.25,92.5,185.0,369.99,739.99,1479.98,2859.96],
+        8:[49.0,98.0,196.0,392.0,783.99,1567.98,3135.96],
+        9:[51.91,103.83,207.65,415.3,830.61,1661.22,3322.44],
+        10:[27.5,55.0,110.0,220.0,440.0,880.0,1760.0,3520.0],
+        11:[29.14,58.27,116.54,233.08,466.16,932.33,1864.66,3729.31],
+        12:[30.87,61.74,123.47,246.94,493.88,987.77,1975.53,3951.07]
+    }
+
     def __init__(self) -> None:
         pass
 
+    #NOTAS CON ESCALAS
     def getNote(self, freq):
         for key, value in self.notes.items():
             if freq == value:
@@ -159,6 +178,17 @@ class NotesUtils:
     
     def getFreq(self, note):
         return self.notes.get(note)
+
+   #NOTAS SIN ESCALA
+    def getNote2(self, freq):
+        for key, value in self.notes2.items():
+            for i in value:
+                if freq == i:
+                    return key
+    
+    def getFreq2(self, note):
+        return self.notes2.get(note)
+
 
     # Función que devuelve la nota más cercana a una frecuencia dada
     def getNearestFrequencyNote(self, f):
@@ -195,6 +225,7 @@ class NotesUtils:
         f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
         self.escribirFichero(f0)
+        print(f0[130])
 
     # Función que se encarga de escribir el "fichero.txt"
     def escribirFichero(self, f0):
@@ -220,6 +251,9 @@ class NotesUtils:
                 note, freq = self.getNearestFrequencyNote(data)
                 notesVector.append(note)
                 freqVector.append(freq)
+            else:
+                notesVector.append("nan")
+                freqVector.append(0)
 
         return freqVector
 
@@ -314,6 +348,18 @@ class NotesUtils:
 
         return suavizado
 
+    def notasFichero(self, freqProcesada):
+        nFichero = []
+
+        for num in freqProcesada:
+            key=self.getNote2(num)
+            if key!="nan":
+                nFichero.append(key)
+            
+        f = open("src/main/utils/NotesRecognizer/notas.txt", 'w')
+        for line in nFichero:
+            f.write(":"+ " tiempo " + " Duracion " + str(line) + "\n")
+
 
 
 if __name__ == '__main__':
@@ -322,19 +368,22 @@ if __name__ == '__main__':
     NT = NotesUtils()
 
     # Reconocer notas y guardarlas en fichero
-    # NT.reconocerNotas("src/main/utils/NotesRecognizer/aure.mp3")
+    NT.reconocerNotas("src/main/utils/NotesRecognizer/aure.mp3")
 
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 
-    # Ploteo la grafica
-    figure = NT.plotFrequency(freqList, False)
+    # Ploteo la grafica sin filtro
+    # figure = NT.plotFrequency(freqList, False)
 
     # Filtro
     freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70)
 
-    figure = NT.plotFrequency(freqProcesada, True)
+    # Ploteo la grafica con filtro
+    figure = NT.plotFrequency(freqProcesada, False)
 
+    # Creacion del vector notas sin escala para el fichero
+    NT.notasFichero(freqProcesada)
 
 
 
