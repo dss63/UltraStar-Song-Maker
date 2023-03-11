@@ -170,7 +170,7 @@ class NotesUtils:
 
     # Sample rate para la detección de notas
     sr = 44000
-
+    tempo = 0
     duracion = 0
 
     def __init__(self) -> None:
@@ -226,11 +226,14 @@ class NotesUtils:
         pista = glob(path)
     
         # Load
-        y, sampleRate = librosa.load(pista[0], self.sr)
+        y, sampleRate = librosa.load(pista[0], sr=self.sr)
 
         f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
 
-        self.duracion = librosa.get_duration(y, self.sr)
+        self.duracion = librosa.get_duration(y=y, sr=self.sr)
+
+        #self.tempo = librosa.beat.tempo(y=y, sr=self.sr)
+        self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
 
         self.escribirFichero(f0)
 
@@ -386,14 +389,6 @@ class NotesUtils:
 
     def notasFichero(self, freq):
         
-        notesVector = []
-        for i in freq:
-            notesVector.append(self.getNote2(i))
-        print(notesVector)
-
-
-
-
         f = open("src/main/utils/NotesRecognizer/notas.txt", 'w')
 
         v = []
@@ -415,7 +410,64 @@ class NotesUtils:
                 tiempoAnterior = tiempo
             tiempo += instante
             keyAnterior = key
-            
+        
+        v[index - 1][1] = tiempo - tiempoAnterior
+
+        # C C C B
+        # V = [t,0,C]
+        # V = [t,3i,C][t,i,B]
+
+        for vec in v:
+            vec[0] = int(vec[0] * 10)
+            vec[1] = int(vec[1] * 10)
+            f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
+
+
+    def notasFicheroBeats(self, freq, tempo):
+        f = open("src/main/utils/NotesRecognizer/beats.txt", 'w')
+
+        bps=tempo/60
+
+
+        v = []
+        instante = float(self.duracion / float(len(freq)))
+        print(instante, self.duracion)
+        tiempo = 0
+        tiempoAnterior = 0
+        keyAnterior = ""    
+        intro=0
+
+        index = 0
+        for num in freq:
+            key = self.getNote2(num)
+            if key != keyAnterior :
+                if key != "nan":
+                    v.append([tiempo, 0, key]) # v = [tiempo, duracion, nota]
+                    if (index > 0):
+                        v[index - 1][1] = tiempo - tiempoAnterior
+                    index += 1
+                
+                if keyAnterior=="nan" and index==1:
+                    intro=tiempoAnterior           
+                
+                tiempoAnterior = tiempo
+            tiempo += instante
+            keyAnterior = key
+        
+        v[index - 1][1] = tiempo - tiempoAnterior
+
+        beatsTotales=bps*self.duracion-intro
+
+        print("GAP ", intro*1000)
+
+        for x in v:
+            x[0] =(x[0] * beatsTotales)/(self.duracion-intro)
+            x[1] = x[1] * bps
+
+        # C C C B
+        # V = [t,0,C]
+        # V = [t,3i,C][t,i,B]
+
         for vec in v:
             vec[0] = int(vec[0] * 10)
             vec[1] = int(vec[1] * 10)
@@ -429,23 +481,24 @@ if __name__ == '__main__':
     NT = NotesUtils()
 
     # Reconocer notas y guardarlas en fichero
-    NT.reconocerNotas("src/main/utils/NotesRecognizer/recorte.wav")
+    NT.reconocerNotas("src/main/utils/NotesRecognizer/vocals.wav")
 
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 
     # Ploteo la grafica sin filtro
-    ax = NT.plotFrequency(freqList, False, None)
+    ax = NT.plotFrequency(freqList, True, None)
 
     # Filtro
     freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70, False)
 
     # Ploteo la grafica con filtro
-    # figure = NT.plotFrequency(freqProcesada, True, ax)
+    figure = NT.plotFrequency(freqProcesada, True, ax)
 
     # Creacion del vector notas sin escala para el fichero
     NT.notasFichero(freqProcesada)
 
-
+    NT.notasFicheroBeats(freqProcesada, NT.tempo)
+    print("TEMPO ", NT.tempo)
 
     
