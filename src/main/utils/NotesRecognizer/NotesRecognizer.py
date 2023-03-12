@@ -169,7 +169,7 @@ class NotesUtils:
     }
 
     # Sample rate para la detección de notas
-    sr = 44000
+    sr = 44100
     tempo = 0
     duracion = 0
 
@@ -233,9 +233,15 @@ class NotesUtils:
         self.duracion = librosa.get_duration(y=y, sr=self.sr)
 
         #self.tempo = librosa.beat.tempo(y=y, sr=self.sr)
-        self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
+        # self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
 
         self.escribirFichero(f0)
+
+    def reconocerTempo(self, path):
+        pista = glob(path)
+        y, sampleRate = librosa.load(pista[0], sr=self.sr)
+        self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
+
 
     # Función que se encarga de escribir el "fichero.txt"
     def escribirFichero(self, f0):
@@ -441,20 +447,24 @@ class NotesUtils:
         for num in freq:
             key = self.getNote2(num)
             if key != keyAnterior :
+                if keyAnterior=="nan" and index==1:
+                    intro=tiempoAnterior 
+
                 if key != "nan":
                     v.append([tiempo, 0, key]) # v = [tiempo, duracion, nota]
                     if (index > 0):
                         v[index - 1][1] = tiempo - tiempoAnterior
                     index += 1
                 
-                if keyAnterior=="nan" and index==1:
-                    intro=tiempoAnterior           
+                     
                 
                 tiempoAnterior = tiempo
-            tiempo += instante
+            if index>1:
+                tiempo += instante
             keyAnterior = key
         
         v[index - 1][1] = tiempo - tiempoAnterior
+        v.pop(0)
 
         beatsTotales=bps*self.duracion-intro
 
@@ -482,21 +492,21 @@ if __name__ == '__main__':
 
     # Reconocer notas y guardarlas en fichero
     NT.reconocerNotas("src/main/utils/NotesRecognizer/vocals.wav")
-
+    NT. reconocerTempo("src/main/utils/NotesRecognizer/vocals.wav")
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 
     # Ploteo la grafica sin filtro
-    ax = NT.plotFrequency(freqList, True, None)
+    #ax = NT.plotFrequency(freqList, True, None)
 
     # Filtro
     freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70, False)
 
     # Ploteo la grafica con filtro
-    figure = NT.plotFrequency(freqProcesada, True, ax)
+    figure = NT.plotFrequency(freqProcesada, True, None)
 
     # Creacion del vector notas sin escala para el fichero
-    NT.notasFichero(freqProcesada)
+    #NT.notasFichero(freqProcesada)
 
     NT.notasFicheroBeats(freqProcesada, NT.tempo)
     print("TEMPO ", NT.tempo)
