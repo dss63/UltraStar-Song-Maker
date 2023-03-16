@@ -430,7 +430,7 @@ class NotesUtils:
 
 
     def notasFicheroBeats(self, freq, tempo):
-        f = open("src/main/utils/NotesRecognizer/beats.txt", 'w')
+        f = open("datos.txt", 'a')
 
         bps=tempo/60
 
@@ -491,8 +491,8 @@ if __name__ == '__main__':
     NT = NotesUtils()
 
     # Reconocer notas y guardarlas en fichero
-    NT.reconocerNotas("src/main/utils/NotesRecognizer/vocals.wav")
-    NT. reconocerTempo("src/main/utils/NotesRecognizer/vocals.wav")
+    NT.reconocerNotas("src/main/utils/NotesRecognizer/alarma.mp3")
+    NT. reconocerTempo("src/main/utils/NotesRecognizer/alarma.mp3")
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 

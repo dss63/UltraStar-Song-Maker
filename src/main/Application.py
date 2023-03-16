@@ -1,26 +1,38 @@
-# Application developed by Aurelio Ortiz de Salazar Peris
-# Copyright de mis huevos
-# Contact: aure.ortizperis@gmail.com
+# Application developed by
+# Copyright 
+# Contact:
 
 import sys
-from bo.Song import Song
-from utils.Reader.LyricsReader import LyricsReader
-from utils.Reader.LyricsReader import FileReader
+from utils.Reader import FileReader
 from utils.NotesRecognizer import NotesRecognizer
 from pathlib import Path
 
 if __name__ == '__main__':
-    # filename = Path("/home/aureortiz/Projects/USSM/src/resources/songs/personalidad")
 
-    # STEP 1: LOAD FILES (SONG, LYRICS, VIDEO)
-    # lyrics = LyricsReader().readFile(Path.joinpath(filename, "lyrics.txt"))
+    # FL = FileReader.submit_form()
+
+    # Instancia de la clase
+    NT = NotesRecognizer.NotesUtils()
+
+    # Reconocer notas y guardarlas en fichero
+    NT.reconocerNotas("src/main/utils/NotesRecognizer/alarma.mp3")
+    NT. reconocerTempo("src/main/utils/NotesRecognizer/alarma.mp3")
+    # Leo el fichero que contiene las frecuencias
+    freqList = NT.leerFichero()
+
+    # Ploteo la grafica sin filtro
+    #ax = NT.plotFrequency(freqList, True, None)
+
+    # Filtro
+    freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70, False)
+
+    # Ploteo la grafica con filtro
+    figure = NT.plotFrequency(freqProcesada, True, None)
+
+    # Creacion del vector notas sin escala para el fichero
+    #NT.notasFichero(freqProcesada)
+
+    NT.notasFicheroBeats(freqProcesada, NT.tempo)
+    print("TEMPO ", NT.tempo)
+
     
-    # STEP 2: EXTRACT MUSICAL NOTES FROM SONG
-    notes = NotesRecognizer.reconocedorDeNotasAure()
-    notes = NotesRecognizer.leerFichero()
-
-    # STEP 3: ARRANGE FILE TO BE INCLUDED IN ULTRASTAR
-    # cancion = Song(filename)
-
-    # Llamamos al .txt
-    # FileReader.submit_form()
