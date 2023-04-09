@@ -229,6 +229,7 @@ class NotesUtils:
         y, sampleRate = librosa.load(pista[0], sr=self.sr)
 
         f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
+        
 
         self.duracion = librosa.get_duration(y=y, sr=self.sr)
 
@@ -492,7 +493,7 @@ if __name__ == '__main__':
 
     # Reconocer notas y guardarlas en fichero
     NT.reconocerNotas("src/main/utils/NotesRecognizer/alarma.mp3")
-    NT. reconocerTempo("src/main/utils/NotesRecognizer/alarma.mp3")
+    NT. reconocerTempo("src/main/utils/NotesRecognizer/alarma2.mp3")
     # Leo el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 

@@ -48,6 +48,12 @@ print(aux)
 if(aux==0):    
     # Crear ventana principal
     root = Tk()
+    root.title("StarMaker")
+    root.geometry("400x400")
+
+    # Crear el título de la ventana
+    titulo = Label(root, text="StarMaker", font=("Arial", 24), pady=20)
+    titulo.grid(row=0, column=1)
 
     # Crear campos de entrada para el formulario
     title_label = Label(root, text="Título:")
@@ -75,28 +81,28 @@ if(aux==0):
     submit_button = Button(root, text="Enviar", command=submit_form)
 
     # Acomodar los campos en la ventana
-    title_label.grid(row=0, column=0)
-    title_entry.grid(row=0, column=1)
+    title_label.grid(row=1, column=0)
+    title_entry.grid(row=1, column=1)
 
-    artist_label.grid(row=1, column=0)
-    artist_entry.grid(row=1, column=1)
+    artist_label.grid(row=2, column=0)
+    artist_entry.grid(row=2, column=1)
 
-    language_label.grid(row=2, column=0)
-    language_entry.grid(row=2, column=1)
+    language_label.grid(row=3, column=0)
+    language_entry.grid(row=3, column=1)
 
-    genre_label.grid(row=3, column=0)
-    genre_entry.grid(row=3, column=1)
+    genre_label.grid(row=4, column=0)
+    genre_entry.grid(row=4, column=1)
 
-    year_label.grid(row=4, column=0)
-    year_entry.grid(row=4, column=1)
+    year_label.grid(row=5, column=0)
+    year_entry.grid(row=5, column=1)
 
-    image_label.grid(row=5, column=0)
-    image_entry.grid(row=5, column=1)
+    image_label.grid(row=6, column=0)
+    image_entry.grid(row=6, column=1)
 
-    video_label.grid(row=6, column=0)
-    video_entry.grid(row=6, column=1)
+    video_label.grid(row=7, column=0)
+    video_entry.grid(row=7, column=1)
 
-    submit_button.grid(row=7, column=1)
+    submit_button.grid(row=8, column=1)
 
     # Ejecutar la ventana principal
     root.mainloop()
