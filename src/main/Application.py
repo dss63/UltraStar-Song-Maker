@@ -44,9 +44,7 @@ if __name__ == '__main__':
 
     # Creacion del vector notas sin escala para el fichero
     #NT.notasFichero(freqProcesada)
-
-    NF = FileReader.Formulario().ejecutar(NT.tempo,0)
     NT.notasFicheroBeats(freqProcesada, NT.tempo)
-    print("TEMPO ", NT.tempo)
+    NF = FileReader.Formulario().ejecutar(NT.tempo, NT.gap)
 
     

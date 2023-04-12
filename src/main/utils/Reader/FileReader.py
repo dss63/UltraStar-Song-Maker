@@ -13,12 +13,18 @@ class Formulario:
         year = self.year_entry.get()
         image = self.image_entry.get()
         video = self.video_entry.get()
+        audio = self.audio_entry.get()
         tempo = self.tempo
         gap = self.gap
 
 
         # Guardar los datos en un archivo de texto
-        with open("datos.txt", "w") as f:
+        with open("datos.txt", "r+") as f:
+
+            contenido = f.read()
+
+            f.seek(0)
+
             f.write("#TITLE:" + title + "\n")
             f.write("#ARTIST:" + artist + "\n")
             f.write("#LANGUAGE:" + language + "\n")
@@ -26,13 +32,15 @@ class Formulario:
             f.write("#YEAR:" + year + "\n")
             f.write("#CREATOR:Daniel Santoyo \n")
 
-            f.write("#MP3: --- PONER EL NOMBRE DEL ARCHIVO DE LA CANCION ---\n")
+            f.write("#MP3:" + audio + "\n")
 
             f.write("#COVER:" + image + "\n")
             f.write("#VIDEO:" + video + "\n")
 
-            f.write("#BPM: " + str(tempo) + "\n")
-            f.write("#GAP: " + str(gap) + "\n")
+            f.write("#BPM:" + str(round(tempo, 2)) + "\n")
+            f.write("#GAP:" + str(round(gap, 2)) + "\n")
+
+            f.write(contenido)
 
             #START
             #END
@@ -47,7 +55,7 @@ class Formulario:
             self.root.destroy()
 
 
-    def ejecutar(self,tempo, gap):
+    def ejecutar(self,tempo,gap):
         self.tempo=tempo
         self.gap=gap
 
@@ -75,6 +83,10 @@ class Formulario:
 
         self.year_label = Label(self.root, text="Año:")
         self.year_entry = Entry(self.root)
+
+        self.audio_label = Label(self.root, text="Audio:")
+        self.audio_entry = Entry(self.root)
+
 
         self.image_label = Label(self.root, text="Imagen:")
         self.image_entry = Entry(self.root)
@@ -104,13 +116,16 @@ class Formulario:
         self.year_label.grid(row=5, column=0)
         self.year_entry.grid(row=5, column=1)
 
-        self.image_label.grid(row=6, column=0)
-        self.image_entry.grid(row=6, column=1)
+        self.audio_label.grid(row=6, column=0)
+        self.audio_entry.grid(row=6, column=1)
 
-        self.video_label.grid(row=7, column=0)
-        self.video_entry.grid(row=7, column=1)
+        self.image_label.grid(row=7, column=0)
+        self.image_entry.grid(row=7, column=1)
 
-        self.submit_button.grid(row=8, column=1)
+        self.video_label.grid(row=8, column=0)
+        self.video_entry.grid(row=8, column=1)
+
+        self.submit_button.grid(row=9, column=1)
 
         # Ejecutar la ventana principal
         self.root.mainloop()

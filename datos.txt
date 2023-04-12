@@ -1,14 +1,14 @@
-#TITLE:alarma
-#ARTIST:santoyo
-#LANGUAGE:espanyol
-#GENRE:poprock
-#YEAR:2020
+#TITLE:Mi alarma
+#ARTIST:Santoyo
+#LANGUAGE:Espanyol
+#GENRE:Pop Rock
+#YEAR:2021
 #CREATOR:Daniel Santoyo 
-#MP3: --- PONER EL NOMBRE DEL ARCHIVO DE LA CANCION ---
-#COVER:ALARMA.jpeg
-#VIDEO:alarma.mp4
-#BPM: 112.34714673913044
-#GAP: 0
+#MP3:Mi alarma.mp3
+#COVER:PORTADA.png
+#VIDEO:youtube final
+#BPM:112.35
+#GAP:2042.98
 : 0 24 11
 : 38 4 6
 : 42 3 7
@@ -19,24 +19,31 @@
 : 88 9 7
 : 98 18 5
 : 116 9 7
-: 125 4 5
-: 129 8 3
-: 141 4 8
-: 145 6 7
-: 151 18 8
-: 170 3 7
-: 173 4 8
-: 178 6 7
-: 184 9 5
-: 194 3 3
-: 197 16 5
-: 214 11 8
-: 225 8 7
-: 234 8 5
-: 246 10 7
-: 256 8 3
-: 265 5 5
-: 271 4 7
-: 275 3 5
-: 279 8 3
+- 125
+: 125 8 5
+: 129 4 3
+: 141 6 8
+: 145 18 7
+: 151 3 8
+- 154
+: 170 6 7
+: 173 9 8
+: 178 3 7
+: 184 16 5
+- 201
+: 194 8 3
+: 197 8 5
+: 214 10 8
+- 224
+: 225 5 7
+: 234 4 5
+: 246 3 7
+- 249
+: 256 0 3
+: 265 0 5
+: 271 0 7
+- 271
+: 275 0 5
+: 279 0 3
 : 287 0 10
+E

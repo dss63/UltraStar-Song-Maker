@@ -172,6 +172,7 @@ class NotesUtils:
     sr = 44100
     tempo = 0
     duracion = 0
+    gap = 0
 
     def __init__(self) -> None:
         pass
@@ -431,14 +432,15 @@ class NotesUtils:
 
 
     def notasFicheroBeats(self, freq, tempo):
-        f = open("datos.txt", 'a')
-
+        f = open("datos.txt", 'w')
+    
         bps=tempo/60
-
+        contadorSaltos = 0
+        beatsTotales = bps*self.duracion
 
         v = []
         instante = float(self.duracion / float(len(freq)))
-        print(instante, self.duracion)
+        # print(instante, self.duracion)
         tiempo = 0
         tiempoAnterior = 0
         keyAnterior = ""    
@@ -447,12 +449,14 @@ class NotesUtils:
         index = 0
         for num in freq:
             key = self.getNote2(num)
-            if key != keyAnterior :
-                if keyAnterior=="nan" and index==1:
-                    intro=tiempoAnterior 
+            if index==2:
+                intro=tiempo
 
+            if key != keyAnterior :
+                
                 if key != "nan":
                     v.append([tiempo, 0, key]) # v = [tiempo, duracion, nota]
+                    contadorSaltos = contadorSaltos + tiempo
                     if (index > 0):
                         v[index - 1][1] = tiempo - tiempoAnterior
                     index += 1
@@ -463,27 +467,45 @@ class NotesUtils:
             if index>1:
                 tiempo += instante
             keyAnterior = key
+
+            if contadorSaltos > 30:
+                contadorSaltos = 0
+                v.append([tiempo, -1, -1]) # v = [tiempo, duracion, nota]
         
         v[index - 1][1] = tiempo - tiempoAnterior
         v.pop(0)
 
-        beatsTotales=bps*self.duracion-intro
-
-        print("GAP ", intro*1000)
+        self.gap=intro*1000
 
         for x in v:
-            x[0] =(x[0] * beatsTotales)/(self.duracion-intro)
-            x[1] = x[1] * bps
+            if x[1] != -1:
+                x[0] =(x[0] * beatsTotales)/(self.duracion)
+                x[1] = x[1] * bps
+            else:
+                x[0] =(x[0] * beatsTotales)/(self.duracion)
 
         # C C C B
         # V = [t,0,C]
         # V = [t,3i,C][t,i,B]
 
-        for vec in v:
-            vec[0] = int(vec[0] * 10)
-            vec[1] = int(vec[1] * 10)
-            f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
+        size = len(v)
+        aux = 0
+        anteriorDuracion = 0
 
+        for vec in v:
+            if aux == size -1:
+                f.write("E")
+            else:
+                if vec[2] != -1:
+                    vec[0] = int(vec[0] * 10)
+                    vec[1] = int(vec[1] * 10)
+                    anteriorDuracion = vec[1]
+                    f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
+                else:
+                    vec[0] = int(vec[0] * 10) + anteriorDuracion
+                    f.write("- "+ str(vec[0])+"\n")
+
+            aux = aux + 1
 
 
 if __name__ == '__main__':
