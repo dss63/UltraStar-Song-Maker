@@ -460,9 +460,7 @@ class NotesUtils:
                     if (index > 0):
                         v[index - 1][1] = tiempo - tiempoAnterior
                     index += 1
-                
-                     
-                
+           
                 tiempoAnterior = tiempo
             if index>1:
                 tiempo += instante
@@ -493,14 +491,17 @@ class NotesUtils:
         anteriorDuracion = 0
 
         for vec in v:
-            if aux == size -1:
+            if aux == size-1 or vec[1]==0:
                 f.write("E")
+                return
             else:
                 if vec[2] != -1:
                     vec[0] = int(vec[0] * 10)
                     vec[1] = int(vec[1] * 10)
                     anteriorDuracion = vec[1]
-                    f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
+                    if str(vec[1]) != "0":
+                        f.write(": "+ str(vec[0]) + " " + str(vec[1]) + " " + str(vec[2]) + "\n")
+
                 else:
                     vec[0] = int(vec[0] * 10) + anteriorDuracion
                     f.write("- "+ str(vec[0])+"\n")
