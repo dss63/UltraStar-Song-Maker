@@ -6,6 +6,7 @@ import sys
 from utils.Reader import FileReader
 from utils.NotesRecognizer import NotesRecognizer
 from utils.NotesRecognizer import Acapella
+import os
 
 from pathlib import Path
 #Importar clase a capela
@@ -40,4 +41,8 @@ if __name__ == '__main__':
     NT.notasFicheroBeats(freqProcesada, NT.tempo)
     NF = FileReader.Formulario().ejecutar(NT.tempo, NT.gap)
 
-    
+    try:
+        os.remove("src/main/utils/NotesRecognizer/solovoz.wav")
+        os.remove("src/main/utils/NotesRecognizer/solomusica.wav")
+    except OSError as error:
+        print(f"Ocurrió un error al eliminar la carpeta: {error}")
