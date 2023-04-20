@@ -5,7 +5,12 @@ import librosa
 from pathlib import Path
 from glob import glob
 import pyaudio
+
+
 import matplotlib.pyplot as plt
+
+
+
 import sys
 import scipy.signal as sig
 from scipy.io import wavfile
@@ -222,40 +227,37 @@ class NotesUtils:
         
         return note, freq
 
-    # Función que se encarga de extraer las notas de un archivo de audio y escribirlas en "fichero.txt"
-    def reconocerNotas(self, path): # el path debe ser desde src: src/main/utils/NotesRecognizer/aure.mp3
-        pista = glob(path)
-    
-        # Load
-        y, sampleRate = librosa.load(pista[0], sr=self.sr)
-
-        f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
-        
-
-        self.duracion = librosa.get_duration(y=y, sr=self.sr)
-
-        #self.tempo = librosa.beat.tempo(y=y, sr=self.sr)
-        # self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
-
-        self.escribirFichero(f0)
-
     def reconocerTempo(self, path):
         pista = glob(path)
         y, sampleRate = librosa.load(pista[0], sr=self.sr)
         self.tempo, beats = librosa.beat.beat_track(y=y,sr=self.sr)
 
 
-    # Función que se encarga de escribir el "fichero.txt"
+    # Función que se encarga de extraer las notas de un archivo de audio y escribirlas en "fichero.txt"
+    def reconocerNotas(self, path):
+        pista = glob(path)
+    
+        # Load
+        y, sampleRate = librosa.load(pista[0], sr=self.sr)
+
+        # Detección de las frecuencias
+        f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
+        
+        # Detección de la duración del audio
+        self.duracion = librosa.get_duration(y=y, sr=self.sr)
+
+        # Llamamos al método escribir fichero de las frecuencias
+        self.escribirFichero(f0)
+
+    # Función que se encarga de escribir el "fichero.txt" con las frecuencias
     def escribirFichero(self, f0):
         f = open("src/main/utils/NotesRecognizer/fichero.txt", 'w')
         for line in f0:
             # if not np.isnan(line):
             f.write(str(line) + "\n")
-            # else:
-            #     f.write(str("silencio") + "\n")
+           
 
     # Función que lee "fichero.txt" y devuelve un vector con su contenido
-    # Igual cuando detecte nan debería escribir un valor legible para saber que en ese instante de tiempo no se ha reconocido frecuencia
     def leerFichero(self):
         f = open("src/main/utils/NotesRecognizer/fichero.txt", 'r')
         lines = f.readlines()
@@ -275,8 +277,7 @@ class NotesUtils:
 
         return freqVector
 
-    # Ejemplo de uso
-    # play_note(440, 1) # Generar la nota La 440 durante 1 segundo
+    # Prueba de sonido
     def play_note(freq, duration):
         p = pyaudio.PyAudio()
 
@@ -445,8 +446,9 @@ class NotesUtils:
         tiempoAnterior = 0
         keyAnterior = ""    
         intro=0
-
         index = 0
+
+        
         for num in freq:
             key = self.getNote2(num)
             if index==2:

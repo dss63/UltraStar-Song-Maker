@@ -21,37 +21,31 @@ class Formulario:
         # Guardar los datos en un archivo de texto
         with open("datos.txt", "r+") as f:
 
+            # Leemos los datos de las notas
             contenido = f.read()
 
+            # Nos posicionamos en el incio del fichero
             f.seek(0)
 
+            # Guardamos los datos del formulario
             f.write("#TITLE:" + title + "\n")
             f.write("#ARTIST:" + artist + "\n")
             f.write("#LANGUAGE:" + language + "\n")
             f.write("#GENRE:" + genre + "\n")
             f.write("#YEAR:" + year + "\n")
             f.write("#CREATOR:Daniel Santoyo \n")
-
             f.write("#MP3:" + audio + "\n")
-
             f.write("#COVER:" + image + "\n")
             f.write("#VIDEO:" + video + "\n")
 
+            # Guardamos el tempo y el gap pasándolos a String
             f.write("#BPM:" + str(round(tempo, 2)) + "\n")
             f.write("#GAP:" + str(round(gap, 2)) + "\n")
 
+            # Escribimos la información de las notas
             f.write(contenido)
 
-            #START
-            #END
-            #VIDEOGAP
-            #BPM
-            #GAP
-            #MEDLEYSTARTBEAT
-            #MEDLEYENDBEAT
-
-            #NOTAS Y DE MAS MOVIDAS
-
+            # Cerramos la ventana de la interfaz con el formulario
             self.root.destroy()
 
 

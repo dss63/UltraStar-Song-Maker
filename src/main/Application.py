@@ -1,15 +1,16 @@
 # Application developed by Daniel Santoyo Sirvent
-# Copyright 
+# Copyright TFG StarMaker
 # Contact: @dsantoyoo
 
-import sys
+# Importar clase del fichero y el formulario
 from utils.Reader import FileReader
-from utils.NotesRecognizer import NotesRecognizer
-from utils.NotesRecognizer import Acapella
-import os
 
-from pathlib import Path
+# Importar clase de Reconocer Notas
+from utils.NotesRecognizer import NotesRecognizer
+
 #Importar clase a capela
+from utils.NotesRecognizer import Acapella
+
 
 if __name__ == '__main__':
 
@@ -17,32 +18,39 @@ if __name__ == '__main__':
     NT = NotesRecognizer.NotesUtils()
     NA = Acapella
 
-    #Crear audio vocal e instrumental
-    NA.separarAudio("src/main/utils/NotesRecognizer/alarma2.mp3","src/main/utils/NotesRecognizer/")
+    # Crear audio vocal e instrumental
+    NA.separarAudio("src/main/utils/NotesRecognizer/cancion.mp3","src/main/utils/NotesRecognizer/")
 
-    # # Reconocer notas y guardarlas en fichero
+    # Reconocer notas y guardarlas en fichero
     NT.reconocerNotas("src/main/utils/NotesRecognizer/solovoz.wav")
-    NT. reconocerTempo("src/main/utils/NotesRecognizer/solomusica.wav")
+    NT. reconocerTempo("src/main/utils/NotesRecognizer/musica.wav")
 
-    # Leo el fichero que contiene las frecuencias
+    # Leemos el fichero que contiene las frecuencias
     freqList = NT.leerFichero()
 
-    # Ploteo la grafica sin filtro
-    #ax = NT.plotFrequency(freqList, True, None)
+    # Ploteamos la grafica sin filtro
+    ax = NT.plotFrequency(freqList, True, None)
 
-    # Filtro
-    freqProcesada = NT.procesamientoDeFrecuencia(freqList, 70, False)
+    # Filtro de suavizado y eliminación de ruido
+    freqProcesada = NT.procesamientoDeFrecuencia(freqList, 50, True)
 
-    # Ploteo la grafica con filtro
-    #figure = NT.plotFrequency(freqProcesada, True, None)
+    # Ploteamos la grafica con filtro
+    figure = NT.plotFrequency(freqProcesada, True, None)
 
     # Creacion del vector notas sin escala para el fichero
-    #NT.notasFichero(freqProcesada)
     NT.notasFicheroBeats(freqProcesada, NT.tempo)
+
+    # Abrimos formulario y añadimos la información al fichero
     NF = FileReader.Formulario().ejecutar(NT.tempo, NT.gap)
 
-    try:
-        os.remove("src/main/utils/NotesRecognizer/solovoz.wav")
-        os.remove("src/main/utils/NotesRecognizer/solomusica.wav")
-    except OSError as error:
-        print(f"Ocurrió un error al eliminar la carpeta: {error}")
+
+
+
+
+
+
+    # try:
+    #     os.remove("src/main/utils/NotesRecognizer/solovoz.wav")
+    #     os.remove("src/main/utils/NotesRecognizer/solomusica.wav")
+    # except OSError as error:
+    #     print(f"Ocurrió un error al eliminar la carpeta: {error}")

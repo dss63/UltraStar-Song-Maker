@@ -4,10 +4,10 @@ from spleeter.separator import Separator
 
 def separarAudio(input_file, output_dir):
 
-   # Load the pre-trained spleeter model
+   # Cargar el modelo pre entrenado de separación de audio
    separator = Separator('spleeter:2stems')
 
-   # Separate the vocals and instrumental from the input audio file
+   # Separar el audio en dos y colocarlos en la dirección output
    separator.separate_to_file(input_file, output_dir, codec='wav')
 
 
