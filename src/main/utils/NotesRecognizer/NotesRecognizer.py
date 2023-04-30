@@ -447,7 +447,7 @@ class NotesUtils:
         keyAnterior = ""    
         intro=0
         index = 0
-
+        
         
         for num in freq:
             key = self.getNote2(num)
@@ -468,7 +468,7 @@ class NotesUtils:
                 tiempo += instante
             keyAnterior = key
 
-            if contadorSaltos > 30:
+            if contadorSaltos > 100:
                 contadorSaltos = 0
                 v.append([tiempo, -1, -1]) # v = [tiempo, duracion, nota]
         
